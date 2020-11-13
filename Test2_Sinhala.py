@@ -30,10 +30,10 @@ api = tweepy.API(auth)
 tweets_df = pd.DataFrame(columns=['ID', 'FULL TEXT', 'CREATED AT'])
 
 for tweet in tweepy.Cursor(api.search,
-                           q='#news',
+                           q='#Education OR #Political OR #Sports',
                  lang="si", tweet_mode='extended').items():
 
-    if (tweet.id_str not in tweetsIds) and ('RT @' not in           tweet.full_text) and (not tweet.retweeted):
+     if (tweet.id_str not in tweetsIds) and ('RT @' not in           tweet.full_text) and (not tweet.retweeted):
         # create a dataframe from the existing information
         df = pd.DataFrame([[ tweet.id_str, tweet.full_text, tweet.created_at]],
                           columns=['ID', 'FULL TEXT', 'CREATED AT'])
