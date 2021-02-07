@@ -3,6 +3,12 @@
 import tweepy
 import pandas as pd
 import csv  # Import csv
+import xlrd
+
+
+
+
+
 
 consumer_key = '1ZFrXbH32jHTtAIz7sYAkttg6'
 consumer_secret = 'kCMmzuesgQ9Ijznh7uL2gqJD1CJ1GFbhO77C8FPZ6oe7p1Fef4'
@@ -20,7 +26,6 @@ readCSV = csv.reader(csvfile, delimiter=',')
 for row in readCSV:
     if (row and row[1] != ''):
         tweetsIds.append(row[1])
-
         print(tweetsIds)
 
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
@@ -30,7 +35,7 @@ api = tweepy.API(auth)
 tweets_df = pd.DataFrame(columns=['ID', 'FULL TEXT', 'CREATED AT'])
 
 for tweet in tweepy.Cursor(api.search,
-                           q='#Education OR #Political OR #Sports #StateNews',
+                           q='#Political OR #Health OR #StateNews OR #CriminalNews',
                  lang="si", tweet_mode='extended').items():
 
      if (tweet.id_str not in tweetsIds) and ('RT @' not in           tweet.full_text) and (not tweet.retweeted):
@@ -42,6 +47,22 @@ for tweet in tweepy.Cursor(api.search,
         tweets_df =  tweets_df.append(df , ignore_index=True)
 
 
+
+
 print ( tweets_df)
 with open('get_tweets.csv', 'a', encoding="utf-8") as f:
     tweets_df.to_csv(f, header=f.tell() == 0)
+
+#remove punctuation, English letters and create a new csv file 7/2/2021
+excel_file_path = 'get_tweets.csv'
+df = pd.read_csv(excel_file_path)
+print(df.head(2))
+df['FULL TEXT'] = df['FULL TEXT'].str.replace(r'[A-z,a-z,{P}!@#$%&\'()"*+,-./:;<=>?@^_`{|}~♦]',"")
+df.to_csv("removed_characters.csv")
+
+
+
+
+
+
+
