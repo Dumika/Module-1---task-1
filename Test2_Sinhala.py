@@ -4,7 +4,11 @@ import tweepy
 import pandas as pd
 import csv  # Import csv
 import xlrd
-
+import codecs
+import nltk
+import re
+from nltk.tokenize import word_tokenize
+from nltk.tokenize import sent_tokenize
 
 
 
@@ -35,7 +39,7 @@ api = tweepy.API(auth)
 tweets_df = pd.DataFrame(columns=['ID', 'FULL TEXT', 'CREATED AT'])
 
 for tweet in tweepy.Cursor(api.search,
-                           q='#Political OR #Health OR #StateNews OR #CriminalNews',
+                           q='#Political OR #Health OR #StateNews OR #CriminalNews OR #News',
                  lang="si", tweet_mode='extended').items():
 
      if (tweet.id_str not in tweetsIds) and ('RT @' not in           tweet.full_text) and (not tweet.retweeted):
@@ -47,8 +51,6 @@ for tweet in tweepy.Cursor(api.search,
         tweets_df =  tweets_df.append(df , ignore_index=True)
 
 
-
-
 print ( tweets_df)
 with open('get_tweets.csv', 'a', encoding="utf-8") as f:
     tweets_df.to_csv(f, header=f.tell() == 0)
@@ -57,11 +59,39 @@ with open('get_tweets.csv', 'a', encoding="utf-8") as f:
 excel_file_path = 'get_tweets.csv'
 df = pd.read_csv(excel_file_path)
 print(df.head(2))
-df['FULL TEXT'] = df['FULL TEXT'].str.replace(r'[A-z,a-z,{P}!@#$%&\'()"*+,-./:;<=>?@^_`{|}~♦]',"")
+df['FULL TEXT'] = df['FULL TEXT'].str.replace(r'[A-z,a-z,{P}!@#$%&\'()"*+,-./:;<=>?@^_`{|}~♦👇👈👉😁😂🛳🤣🙂📌🌳🤔▶🔻🤷]',"")
 df.to_csv("removed_characters.csv")
 
+# remove stopwords  2/3/2021
 
+tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
+with codecs.open('StopWords.txt', 'r', encoding='utf8') as stop_word_data:
+ stop_words = stop_word_data.read()
+tokenized_stop_word = tokenizer.tokenize(stop_words)
+stop_word_list = []
+for stop_words in tokenized_stop_word:
+ stop_words_sentence = stop_words.split()
+ for word in stop_words_sentence:
+  stop_word_list.append(word)
+for word in stop_word_list:
+  print(word)
+
+excel_file_path = 'removed_characters.csv'
+new_list = []
+df = pd.read_csv(excel_file_path, usecols = ['FULL TEXT'])
+for row in df.iterrows():
+ list = row[1]
+ for lrow in list:
+  twords = lrow.split()
+  for tword in twords:
+   if tword in stop_word_list:
+    twords.remove(tword)
+  new_list.append(twords)
+  with codecs.open("removed_stopwords.txt", "a", encoding="utf-8") as output:
+   output.write(str(twords))
+   output.write('\n')
+   output.close()
 
 
 
